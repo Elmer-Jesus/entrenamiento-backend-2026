@@ -1,36 +1,32 @@
+import json # Importamos la librería nativa para manejar JSON
 class Usuario:
     def __init__(self, nombre, email, password):
         self.nombre=nombre
         self.email=email
         self.__password=password
+        self.seguro=self.validar_email()
 
     def describir(self):
         print(f"Usuario {self.nombre} | Email: {self.email}")
-    
-    def actualizar_password(self, vieja_pass, nueva_pass):
-        if vieja_pass==self.__password:
-            self.__password=nueva_pass
-            print("✅ Contraseña actualizada con éxito.")
-        else:
-            print("❌ Error: La contraseña vieja no coincide. Intento de hackeo detectado.")
 
-    def validar_email(self, email):
-        if "@" in email and email.count("@")==1:
-            print("✅ Correo valido")
-        else:
-            print("❌El correo no es valido")
-    
-# --- PRUEBA DE SEGURIDAD ---
-user_test=Usuario("Elmer", "elmer@gmail.com", "Elmer123")
-# Verificamos si el correo es valido
-user_test.validar_email("elmergmail.com")
-# Intento 1: Error (Contraseña vieja mal)
-user_test.actualizar_password("12345","elmer1234")
-# Intento 2: Éxito
-user_test.actualizar_password("Elmer123","elmer1234")
-# Intento 3: ¿Podemos ver la contraseña directamente? 
-try:
-    print(user_test.__password)
-except AttributeError:
-    print("🛡️ Seguridad activa: No puedes acceder a la contraseña directamente desde afuera.")
+    def validar_email(self):
+        return "@" in self.email and self.email.count("@")==1
 
+    # NUEVO MÉTODO: Convierte el objeto en una respuesta de API
+    def to_json(self):
+        # Creamos un diccionario (clave-valor) EXCLUYENDO la contraseña por seguridad
+        datos_publicos={
+            "nombre":self.nombre,
+            "email":self.email,
+            "estado":"activo",
+            "seguro":self.seguro
+        }
+        # Convertimos el diccionario en un texto formateado tipo JSON
+        return json.dumps(datos_publicos, indent=4)
+# --- PRUEBA DE API ---
+nuevo_usuario=Usuario("Elmer", "elmer@gmail.com", "mi_password_secreto")
+
+print("--- Enviando datos al Frontend (Simulación) ---")
+respuesta_servidor=nuevo_usuario.to_json()
+print(respuesta_servidor)
+print(type(respuesta_servidor)) # Verás que ahora es un 'str' (texto), listo para viajar por red
